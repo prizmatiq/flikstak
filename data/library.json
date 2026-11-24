@@ -22551,6 +22551,28 @@
     }
    ],
    "imdbVotes": 22272
+  },
+  {
+   "id": "my friend ivan lapshin|1985",
+   "type": "film",
+   "t": "My Friend Ivan Lapshin",
+   "y": 1985,
+   "d": "Aleksei German",
+   "g": [
+    "Drama"
+   ],
+   "n": "",
+   "w": false,
+   "r": null,
+   "lb": null,
+   "imdb": null,
+   "c": [],
+   "imdbId": "tt0084345",
+   "idLock": true,
+   "tmdbId": 83491,
+   "lbUrl": "https://letterboxd.com/film/my-friend-ivan-lapshin/",
+   "runtime": 95,
+   "v": 0
   }
  ],
  "cols": [
