@@ -1,6 +1,6 @@
 # A Film Library
 
-A personal film library: posters, genres, mood collections, my 5-star ratings, Letterboxd and IMDb scores.
+A personal film library: posters, genres, mood collections, Letterboxd and IMDb scores.
 
 - `index.html` — the whole app (GitHub Pages serves it).
 - `data/library.json` — the library itself. The app writes here when you press **Save to GitHub**.
