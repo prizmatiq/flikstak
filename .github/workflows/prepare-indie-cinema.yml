@@ -1,0 +1,126 @@
+name: Prepare Indie Cinema artwork
+on:
+  push:
+    branches: [artwork/indie-cinema-20261124]
+    paths: ['.github/workflows/prepare-indie-cinema.yml']
+permissions:
+  contents: write
+jobs:
+  posters:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install Pillow
+      - name: Assemble film covers
+        shell: python
+        run: |
+          from io import BytesIO
+          from pathlib import Path
+          import json
+          import re
+          import textwrap
+          import urllib.request
+          from urllib.parse import urlparse
+          from concurrent.futures import ThreadPoolExecutor
+          from PIL import Image, ImageDraw, ImageFont, ImageOps
+          
+          movies = json.loads("[[\"divided-by-tracks\",\"Divided by Tracks, United by Tracks\",\"Varvara Aristakesyan\",\"Hki_m5tEs6o\",2025],[\"ill-remember-you\",\"I'll Remember You\",\"Varvara Aristakesyan\",\"LKSg_hsT6Ww\",2026],[\"what-have-you-been-up-to\",\"What Have You Been Up To?\",\"Archie Waterson\",\"cH7HclZzYLA\",2026],[\"biohazard\",\"Biohazard\",\"Chandler Riggs\",\"x-a5Kn9p8WM\",2026],[\"project-arc\",\"Project Arc: An Arc Raiders Fan Film\",\"Christopher Jacobs, Louis Lingjaerde\",\"7uTQvbZCOH8\",2026],[\"nothing-much\",\"nothing much.\",\"eyes of leo\",\"OaKezvjiO7c\",2026],[\"this-is-us\",\"This is Us\",\"Joan Pous\",\"vFqu5aNLNQ4\",2025],[\"one-last-walk\",\"One Last Walk\",\"Forrain\",\"LD2bI5ozz_I\",2026]]")
+          catalog = {
+              "biohazard": ("tt49166238", "https://letterboxd.com/film/biohazard-2026/"),
+              "project-arc": ("tt48368130", None),
+              "one-last-walk": (None, "https://letterboxd.com/film/one-last-walk-2026/"),
+              "what-have-you-been-up-to": (None, "https://letterboxd.com/film/what-have-you-been-up-to/")
+          }
+          def read(url):
+              req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0", "Accept":"*/*"})
+              with urllib.request.urlopen(req,timeout=8) as r:
+                  return r.read(10000000)
+          def img(url):
+              with Image.open(BytesIO(read(url))) as im:
+                  im.load()
+                  return im.convert("RGB")
+          def official(slug):
+              imdb, lb = catalog.get(slug,(None,None))
+              urls=[]
+              if imdb:
+                  try:
+                      meta=json.loads(read("https://v3-cinemeta.strem.io/meta/movie/"+imdb+".json"))["meta"]
+                      if meta.get("imdb_id",meta.get("id"))==imdb and meta.get("poster"):
+                          urls.append(meta["poster"])
+                  except Exception: pass
+              if lb:
+                  try:
+                      html=read(lb).decode("utf-8")
+                      candidates=re.findall(r'<img\b[^>]*\bsrc="([^"]+)"',html)
+                      urls += [u.replace("&amp;","&") for u in candidates if "film-poster" in u and ("-230-" in u or "-460-" in u) and "empty-poster" not in u][:1]
+                  except Exception: pass
+              if slug=="one-last-walk":
+                  urls += ["https://m.aceshowbiz.com/images/poster/small/00028122.jpg"]
+              for url in urls:
+                  try:
+                      im=img(url)
+                      if im.width>=150 and .47<im.width/im.height<.85 and sum(ImageStatRange(im))>120:
+                          return im,url
+                  except Exception: pass
+              return None,None
+          def ImageStatRange(im):
+              return [mx-mn for mn,mx in im.getextrema()]
+          def font(size,bold=False):
+              return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans"+("-Bold" if bold else "")+".ttf",size)
+          colors={"divided-by-tracks":("#202c29","#decd9f"),"ill-remember-you":("#33212b","#f1b3ad"),"what-have-you-been-up-to":("#192633","#a7d2ef"),"biohazard":("#211915","#efa14f"),"project-arc":("#172526","#e3aa65"),"nothing-much":("#202727","#b4d7b6"),"this-is-us":("#262138","#d5b7f4"),"one-last-walk":("#262720","#ddc58f")}
+          dest=Path("posters/indie-cinema")
+          dest.mkdir(parents=True,exist_ok=True)
+          def make(row):
+              slug,title,director,video,year=row
+              im,source=official(slug)
+              if im:
+                  out=ImageOps.fit(im,(540,810),method=Image.Resampling.LANCZOS)
+              else:
+                  for quality in ["maxresdefault","sddefault","hqdefault"]:
+                      source="https://i.ytimg.com/vi/"+video+"/"+quality+".jpg"
+                      try:
+                          im=img(source)
+                          if im.width>=320: break
+                      except Exception: im=None
+                  if not im or im.width<320: raise RuntimeError("Missing video art: "+slug)
+                  if abs(im.width/im.height-4/3)<.03:
+                      h=round(im.width*9/16)
+                      im=im.crop((0,(im.height-h)//2,im.width,(im.height+h)//2))
+                  bg,accent=colors[slug]
+                  out=Image.new("RGB",(540,810),bg)
+                  draw=ImageDraw.Draw(out)
+                  draw.text((30,29),str(year),font=font(22),fill=accent)
+                  draw.line((30,70,510,70),fill=accent,width=1)
+                  frame=ImageOps.fit(im,(540,350),method=Image.Resampling.LANCZOS)
+                  out.paste(frame,(0,95))
+                  title="Project Arc" if slug=="project-arc" else title
+                  size=51
+                  while size>24:
+                      f=font(size,True)
+                      words=title.split()
+                      lines=[words.pop(0)]
+                      for w in words:
+                          trial=lines[-1]+" "+w
+                          if draw.textlength(trial,font=f)<=479: lines[-1]=trial
+                          else: lines.append(w)
+                      if len(lines)<=3 and all(draw.textlength(line,font=f)<=479 for line in lines): break
+                      size-=2
+                  y=475
+                  for line in lines:
+                      draw.text((27,y),line,font=f,fill="#f7f3e8",stroke_width=0)
+                      y+=size+8
+                  draw.line((30,695,510,695),fill=accent,width=2)
+                  y=715
+                  for person in director.split(", "):
+                      draw.text((30,y),person,font=font(22),fill=accent)
+                      y+=29
+              out.save(dest/(slug+".jpg"),quality=89,optimize=True,progressive=True)
+              return slug,source
+          with ThreadPoolExecutor(max_workers=4) as pool:
+              for row in pool.map(make,movies): print(*row)
+      - name: Save finished images on the artwork branch
+        run: |
+          git add -- posters/indie-cinema/*.jpg
+          git -c user.name='github-actions[bot]' -c user.email='41898283+github-actions[bot]@users.noreply.github.com' commit -m 'Render Indie Cinema poster images'
+          git push origin HEAD:artwork/indie-cinema-20261124
