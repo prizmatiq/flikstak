@@ -400,5 +400,24 @@
    "phantom of the paradise|1974",
    "alien|1979"
   ]
+ },
+ "indie-cinema": {
+  "name": "Indie Cinema",
+  "desc": "Independent shorts, fan films and a music video from Grinn’s YouTube playlist.",
+  "size": "W",
+  "c1": "#233749",
+  "c2": "#6E483B",
+  "bg": "posters/indie-cinema/Hki_m5tEs6o.jpg",
+  "ids": [
+   "divided by tracks, united by tracks|2025",
+   "i'll remember you|2026",
+   "what have you been up to?|2026",
+   "biohazard|2026",
+   "hearing damage|2026",
+   "project arc: an arc raiders fan film|2026",
+   "nothing much.|2026",
+   "this is us|2025",
+   "one last walk|2026"
+  ]
  }
 }
