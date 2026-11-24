@@ -22564,15 +22564,38 @@
    "n": "",
    "w": false,
    "r": null,
-   "lb": null,
-   "imdb": null,
+   "lb": 3.86,
+   "imdb": 7.4,
    "c": [],
    "imdbId": "tt0084345",
    "idLock": true,
    "tmdbId": 83491,
    "lbUrl": "https://letterboxd.com/film/my-friend-ivan-lapshin/",
-   "runtime": 95,
-   "v": 0
+   "runtime": 100,
+   "v": 3,
+   "overview": "Russian provincial town in the middle of the 1930s Stalin's Great Purge. Ivan Lapshin, the head of the local police, does what he has to do. And he does it well.",
+   "poster": "https://image.tmdb.org/t/p/w500/cFz8PUfnEtN1KaNFnkhqJCB4FIc.jpg",
+   "cast": [
+    "Andrei Boltnev",
+    "Nina Ruslanova",
+    "Andrey Mironov",
+    "Aleksei Zharkov"
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w1280/1Cc7zepRQro1xdhJnsmB6rSiWth.jpg",
+   "trailer": "M-JdNriLu5g",
+   "castP": [
+    "https://image.tmdb.org/t/p/w185/7Tj4HgICWaMDqmz7vMHkFi07yEL.jpg",
+    "https://image.tmdb.org/t/p/w185/7kVmg5lX36VPQrLKfKIjbd03YCv.jpg",
+    "https://image.tmdb.org/t/p/w185/r0PeZ1yiBAVVzGOLCx3m5P4pRrh.jpg",
+    "https://image.tmdb.org/t/p/w185/tlCGRghZp15hdOXq17t2KdugXJX.jpg"
+   ],
+   "dirP": [
+    {
+     "n": "Alexei German Sr.",
+     "p": "https://image.tmdb.org/t/p/w185/evufNoSmmrfwEaQUUGXpFMfy3Zq.jpg"
+    }
+   ],
+   "imdbVotes": 3088
   }
  ],
  "cols": [
