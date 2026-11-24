@@ -1,6 +1,6 @@
 {
-  "name": "Cinema",
-  "short_name": "Cinema",
+  "name": "flikstak",
+  "short_name": "flikstak",
   "description": "Personal film and series library",
   "start_url": "./",
   "scope": "./",
