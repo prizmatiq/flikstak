@@ -1,4 +1,4 @@
-# Grinn's Film Library
+# A Film Library
 
 A personal film library: posters, genres, mood collections, my 5-star ratings, Letterboxd and IMDb scores.
 
