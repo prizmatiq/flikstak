@@ -53,7 +53,7 @@ jobs:
                   try:
                       html=read(lb).decode("utf-8")
                       candidates=re.findall(r'<img\b[^>]*\bsrc="([^"]+)"',html)
-                      urls += [u.replace("&amp;","&") for u in candidates if "film-poster" in u and ("-230-" in u or "-460-" in u) and "empty-poster" not in u][:1]
+                      urls += [u.replace("&amp;","&") for u in candidates if slug in u and "film-poster" in u and ("-230-" in u or "-460-" in u) and "empty-poster" not in u][:1]
                   except Exception: pass
               if slug=="one-last-walk":
                   urls += ["https://m.aceshowbiz.com/images/poster/small/00028122.jpg"]
@@ -77,10 +77,14 @@ jobs:
               if im:
                   out=ImageOps.fit(im,(540,810),method=Image.Resampling.LANCZOS)
               else:
-                  for quality in ["maxresdefault","sddefault","hqdefault"]:
+                  qualities = ["maxresdefault","sddefault","hqdefault"]
+                  if slug in {"what-have-you-been-up-to","project-arc","nothing-much"}:
+                      qualities = ["hq2","sd2","2"] + qualities
+                  for quality in qualities:
                       source="https://i.ytimg.com/vi/"+video+"/"+quality+".jpg"
                       try:
                           im=img(source)
+                          if im.getextrema() and max(ImageStatRange(im))<48: continue
                           if im.width>=320: break
                       except Exception: im=None
                   if not im or im.width<320: raise RuntimeError("Missing video art: "+slug)
@@ -104,7 +108,7 @@ jobs:
                           trial=lines[-1]+" "+w
                           if draw.textlength(trial,font=f)<=479: lines[-1]=trial
                           else: lines.append(w)
-                      if len(lines)<=3 and all(draw.textlength(line,font=f)<=479 for line in lines): break
+                      if len(lines)<=(2 if slug=='divided-by-tracks' else 3) and all(draw.textlength(line,font=f)<=479 for line in lines): break
                       size-=2
                   y=475
                   for line in lines:
