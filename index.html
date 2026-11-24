@@ -129,6 +129,7 @@ section.dec h2 small{font-family:var(--f-mono);font-size:12px;font-weight:400;co
 .cb .cnt{color:rgba(255,255,255,.8);text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .cb .mini{display:flex;gap:6px;margin-top:8px}
 .cb .mini span{width:34px;aspect-ratio:2/3;border-radius:3px;background:rgba(255,255,255,.12) center/cover no-repeat;box-shadow:0 2px 8px rgba(0,0,0,.4);flex:none}
+.cb .mini span img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .cb.L .mini span{width:46px}
 .cb .mini span.fade{opacity:.35}
 .col{display:flex;flex-direction:column;gap:8px;text-align:left;padding:16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;color:inherit;min-width:0}
@@ -291,6 +292,15 @@ const TITLE="flikstak";
 /* If the site is not at <owner>.github.io/<repo>, set owner and repo here */
 const CONFIG={owner:"",repo:"",branch:"main",path:"data/library.json"};
 const IMG="https://image.tmdb.org/t/p/";
+// Retry only failed TMDB images, once, via the fixed image-only proxy.
+const TMDB_PROXY="https://flikstak-proxy.5kg9w6jt67.workers.dev";
+window.flikstakImageFallback=function(img){
+  const src=img.getAttribute("src")||"";
+  if(img.dataset.tmdbRetried||!src.startsWith(IMG))return false;
+  img.dataset.tmdbRetried="1";
+  img.src=TMDB_PROXY+src.slice("https://image.tmdb.org".length);
+  return true;
+};
 let films=[], cols=[];
 /* Titles that come out after this year stay in the data but are not shown. */
 const live=list=>list.filter(f=>f.y<=new Date().getFullYear());
@@ -393,7 +403,7 @@ function libraryView(){
   const c=ui.col?cols.find(x=>x.id===ui.col):null;
   const who=ui.director||ui.actor,dn=ui.director?films.filter(f=>people(f.d).includes(ui.director)).length:ui.actor?films.filter(f=>(f.cast||[]).includes(ui.actor)).length:0;
   const ph=who?personPhoto():null;
-  $("#view").innerHTML=(who?`<div class="banner"><div class="bwho">${who?`<span class="bav">${ph?`<img src="${esc(ph)}" alt="" onerror="this.nextElementSibling.hidden=false;this.remove()">`:""}<i${ph?" hidden":""}>${esc(who.split(/\s+/).map(w=>w[0]).slice(0,2).join(""))}</i></span>`:""}<div><h2>${esc(who)}</h2><p>${plural(dn,"title")} in the library · ${ui.director?(()=>{const ts=new Set(films.filter(f=>people(f.d).includes(ui.director)).map(f=>TYPE(f)==="series"?"creator":"director"));return [...ts].sort((a,b)=>a==="director"?-1:1).join(" & ")})():"cast"}</p></div></div><button class="x" id="cleardir" aria-label="Clear filter" title="Clear filter"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>`:"")+
+  $("#view").innerHTML=(who?`<div class="banner"><div class="bwho">${who?`<span class="bav">${ph?`<img src="${esc(ph)}" alt="" onerror="if(window.flikstakImageFallback(this))return;this.nextElementSibling.hidden=false;this.remove()">`:""}<i${ph?" hidden":""}>${esc(who.split(/\s+/).map(w=>w[0]).slice(0,2).join(""))}</i></span>`:""}<div><h2>${esc(who)}</h2><p>${plural(dn,"title")} in the library · ${ui.director?(()=>{const ts=new Set(films.filter(f=>people(f.d).includes(ui.director)).map(f=>TYPE(f)==="series"?"creator":"director"));return [...ts].sort((a,b)=>a==="director"?-1:1).join(" & ")})():"cast"}</p></div></div><button class="x" id="cleardir" aria-label="Clear filter" title="Clear filter"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>`:"")+
   (ui.fr?`<div class="banner"><div><h2>${esc(ui.fr)}</h2><p>${films.filter(f=>f.fr===ui.fr).length} titles · in watch order</p></div><button class="x" id="clearfr" aria-label="Back to collections" title="Back to collections"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>`:"")+
   (c?`<div class="banner"><div><h2>${esc(c.name)}</h2><p>${esc(c.desc)}</p></div><button class="x" id="clearcol" aria-label="${ui.view==="collections"?"All collections":"Clear filter"}" title="${ui.view==="collections"?"All collections":"Clear filter"}"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>`:"")+
   `<div class="fpanel" id="fpanel" ${ui.filters?"":"hidden"}>${c||ui.director||ui.actor?"":`<div class="decades" id="decades" aria-label="Films by decade"></div>`}<div class="tools">
@@ -436,7 +446,7 @@ const SORT={
   imdb:(a,b)=>(b.imdb??-1)-(a.imdb??-1)||b.y-a.y};
 function tileHTML(f){
   return `<button class="tile film-t" data-id="${esc(f.id)}">
-    <span class="art${f.poster?" has-img":""}">${f.poster?`<img src="${posterSrc(f,342)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('has-img');this.remove()">`:""}<span class="ay">${f.y}</span><span class="at">${esc(f.t)}</span><span class="ad">${esc(f.d)}</span></span>
+    <span class="art${f.poster?" has-img":""}">${f.poster?`<img src="${posterSrc(f,342)}" alt="" loading="lazy" onerror="if(window.flikstakImageFallback(this))return;this.parentNode.classList.remove('has-img');this.remove()">`:""}<span class="ay">${f.y}</span><span class="at">${esc(f.t)}</span><span class="ad">${esc(f.d)}</span></span>
     <span class="cap"><span class="ct" title="${esc(f.t)}">${esc(shortT(f))}</span><span class="cy">${f.y}${f.imdb!=null?" · "+Number(f.imdb).toFixed(1):""}</span></span></button>`;
 }
 function rowHTML(f,withYear){
@@ -472,9 +482,9 @@ function collectionsView(){
     let bg=c.bg||null;if(!bg){const b=fs.find(f=>f.backdrop&&!used.has(f.id));if(b){used.add(b.id);bg=b.backdrop}}
     const ps=fs.filter(f=>f.poster).slice(0,4),fade=fs.length>=3;
     return `<button class="col cb ${c.size||"S"}${bg?" has-bg":""}" data-c="${c.id}" style="--c1:${esc(c.c1||"#3A3734")};--c2:${esc(c.c2||"#1B1A19")}" title="${esc(c.desc||"")}">
-      ${bg?`<img class="cbg" src="${esc(bg)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('has-bg');this.remove()">`:""}
+      ${bg?`<img class="cbg" src="${esc(bg)}" alt="" loading="lazy" onerror="if(window.flikstakImageFallback(this))return;this.parentNode.classList.remove('has-bg');this.remove()">`:""}
       <span class="cnt">${plural(fs.length,"title")}</span><h3>${esc(c.name)}</h3>
-      ${ps.length?`<span class="mini">${ps.map((f,i)=>`<span${fade&&i===ps.length-1?' class="fade"':""} style="background-image:url('${esc(thumb(f))}')"></span>`).join("")}</span>`:""}</button>`}).join("");
+      ${ps.length?`<span class="mini">${ps.map((f,i)=>`<span${fade&&i===ps.length-1?' class="fade"':""} ><img src="${esc(thumb(f))}" alt="" loading="lazy" onerror="if(window.flikstakImageFallback(this))return;this.remove()"></span>`).join("")}</span>`:""}</button>`}).join("");
   if(ui.editable)h+=`<form class="col new" id="newcol"><h3>New collection</h3>
     <input type="text" id="nc-name" placeholder="Name, e.g. Rainy Sunday" required aria-label="Collection name">
     <textarea id="nc-desc" rows="2" placeholder="What mood is it for?" aria-label="Description"></textarea>
@@ -489,7 +499,7 @@ function franchisesHTML(){
   const names=frNames().sort((a,b)=>{const ya=Math.min(...films.filter(f=>f.fr===a).map(f=>f.y)),yb=Math.min(...films.filter(f=>f.fr===b).map(f=>f.y));return yb-ya});
   return `<h3 class="sech">Franchises</h3><div class="frs">`+names.map(n=>{
     const fs=films.filter(f=>f.fr===n).sort((a,b)=>(a.frI??0)-(b.frI??0)),ys=fs.map(f=>f.y),w=fs.filter(f=>f.w).length;
-    return `<button class="fr" data-fr="${esc(n)}"><span class="frstrip">${fs.slice(0,5).map(f=>`<span class="frp${f.poster?" has-img":""}">${f.poster?`<img src="${posterSrc(f,342)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('has-img');this.remove()">`:""}</span>`).join("")}</span>
+    return `<button class="fr" data-fr="${esc(n)}"><span class="frstrip">${fs.slice(0,5).map(f=>`<span class="frp${f.poster?" has-img":""}">${f.poster?`<img src="${posterSrc(f,342)}" alt="" loading="lazy" onerror="if(window.flikstakImageFallback(this))return;this.parentNode.classList.remove('has-img');this.remove()">`:""}</span>`).join("")}</span>
       <span class="frt"><b>${esc(n)}</b><span>${fs.length} titles · ${Math.min(...ys)}–${Math.max(...ys)}${w?` · ${w} watched`:""}</span></span></button>`}).join("")+`</div>`;
 }
 function foot(){
@@ -540,12 +550,12 @@ function drawer(){
       <button class="btn" type="submit" style="align-self:flex-start">Add to library</button></form>`;
   }else{
     const E=ui.editable;
-    h+=`<div class="mgrid"><div class="pcol"><div class="poster${f.poster?" has-img":""}">${f.poster?`<img src="${posterSrc(f,500)}" alt="Poster: ${esc(f.t)}" onerror="this.parentNode.classList.remove('has-img');this.remove()">`:""}<span class="py">${f.y}</span><span class="pt">${esc(f.t)}</span><span class="py">${esc(f.d)}</span></div>
+    h+=`<div class="mgrid"><div class="pcol"><div class="poster${f.poster?" has-img":""}">${f.poster?`<img src="${posterSrc(f,500)}" alt="Poster: ${esc(f.t)}" onerror="if(window.flikstakImageFallback(this))return;this.parentNode.classList.remove('has-img');this.remove()">`:""}<span class="py">${f.y}</span><span class="pt">${esc(f.t)}</span><span class="py">${esc(f.d)}</span></div>
         <div class="prow"><a class="tbtn" href="${f.watch?esc(f.watch):f.trailer?"https://www.youtube.com/watch?v="+encodeURIComponent(f.trailer):"https://www.youtube.com/results?search_query="+encodeURIComponent(f.t+" "+f.y+" trailer")}" target="_blank" rel="noopener" title="${f.watch?"Watch the film":f.trailer?"Watch the trailer on YouTube":"Search for the trailer on YouTube"}"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>${f.watch?"Watch ↗":"Trailer ↗"}</a><button type="button" class="ib sq" id="share" title="Copy link to this title" aria-label="Copy link"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L11.6 6M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.6-1.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>
       <div class="mcol"><div class="info">${(()=>{const [a,b]=splitFr(f);return `<h2>${b?`<span class="h2pre">${esc(a)}</span>${esc(b)}`:esc(a)}</h2>`})()}
         <span class="meta2">${f.y}${f.runtime?` · ${f.runtime} min`:""}</span>
         ${f.d?`<div class="dlinks" id="dirlinks"><span class="lbl">${TYPE(f)==="series"?"Created by":"Directed by"}</span>${people(f.d).map(n=>`<button class="dlink" data-p="${esc(n)}" title="All titles by ${esc(n)}">${esc(n)}</button>`).join('<span class="sep">,</span>')}</div>`:""}
-        ${(f.cast||[]).length?`<div class="castl" id="castl"><span class="lbl">Starring</span>${f.cast.map((n,i)=>{const ph=(f.castP||[])[i];return `<button data-a="${esc(n)}" title="All titles with ${esc(n)}"><span class="av">${ph?`<img src="${esc(ph)}" alt="" loading="lazy" onerror="this.nextElementSibling.hidden=false;this.remove()">`:""}<i${ph?" hidden":""}>${esc(n.split(/\s+/).map(w=>w[0]).slice(0,2).join(""))}</i></span>${esc(n)}</button>`}).join("")}</div>`:""}
+        ${(f.cast||[]).length?`<div class="castl" id="castl"><span class="lbl">Starring</span>${f.cast.map((n,i)=>{const ph=(f.castP||[])[i];return `<button data-a="${esc(n)}" title="All titles with ${esc(n)}"><span class="av">${ph?`<img src="${esc(ph)}" alt="" loading="lazy" onerror="if(window.flikstakImageFallback(this))return;this.nextElementSibling.hidden=false;this.remove()">`:""}<i${ph?" hidden":""}>${esc(n.split(/\s+/).map(w=>w[0]).slice(0,2).join(""))}</i></span>${esc(n)}</button>`}).join("")}</div>`:""}
         ${tags(f).length?`<div class="glinks" id="glinks">${tags(f).map(g=>`<button data-g="${esc(g)}" title="All ${esc(g)} titles">${esc(g)}</button>`).join("")}</div>`:""}
       ${E?`<button class="btn ${f.w?"":"ghost"} watch" id="watch">${f.w?"Watched ✓":"Mark as watched"}</button>`:""}
       </div>
@@ -558,7 +568,7 @@ function drawer(){
       ${f.w?(E?`<div class="myv"><div class="three"><label class="fld"><span class="lbl">Watched in</span><input type="month" id="wd" value="${esc(f.wd||"")}"></label></div><label class="fld"><span class="lbl">Review title</span><input type="text" id="revT" value="${esc(f.revT||"")}" placeholder="First impressions"></label><label class="fld"><span class="lbl">My review</span><textarea id="rev" rows="6" placeholder="What stayed with you?">${esc(f.rev||"")}</textarea></label></div>`
         :(f.rev?reviewHTML(f):"")):""}
       ${f.fr?(()=>{const fs=films.filter(x=>x.fr===f.fr).sort((a,b)=>(a.frI??0)-(b.frI??0));const i=fs.findIndex(x=>x.id===f.id);
-        return `<button type="button" class="frlink" id="frlink" title="Open franchise"><span class="frl-strip">${fs.slice(0,6).map(x=>`<span class="frp${x.poster?" has-img":""}${x.id===f.id?" cur":""}">${x.poster?`<img src="${posterSrc(x,342)}" alt="" loading="lazy" onerror="this.parentNode.classList.remove('has-img');this.remove()">`:""}</span>`).join("")}</span>
+        return `<button type="button" class="frlink" id="frlink" title="Open franchise"><span class="frl-strip">${fs.slice(0,6).map(x=>`<span class="frp${x.poster?" has-img":""}${x.id===f.id?" cur":""}">${x.poster?`<img src="${posterSrc(x,342)}" alt="" loading="lazy" onerror="if(window.flikstakImageFallback(this))return;this.parentNode.classList.remove('has-img');this.remove()">`:""}</span>`).join("")}</span>
           <span class="frl-t"><span class="lbl">Franchise</span><b>${esc(f.fr)}</b><span class="frl-n">Part ${i+1} of ${fs.length}</span></span><span class="frl-go" aria-hidden="true">→</span></button>`})():""}
       <div class="fld"><span class="lbl">Collections</span>
         <div class="colnav" id="colnav">${cols.filter(c=>f.c.includes(c.id)).map(c=>`<button type="button" class="mchip" data-go="${c.id}" title="Open collection">${esc(c.name)}</button>`).join("")||`<span class="rv" style="margin:0">None</span>`}${E?`<button type="button" class="editc" id="editc">Edit</button>`:""}</div>
