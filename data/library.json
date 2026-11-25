@@ -22858,8 +22858,35 @@
    "n": "Found footage. Also released as The Dyatlov Pass Incident.",
    "w": false,
    "r": null,
-   "lb": null,
-   "imdb": null
+   "lb": 2.56,
+   "imdb": 5.7,
+   "runtime": 100,
+   "overview": "A group of students go to the location of the infamous Dyatlov pass incident to make a documentary, but things take a turn for the worse as the secret of what happened there is revealed.",
+   "poster": "https://image.tmdb.org/t/p/w500/8hyvniwVeSvKbTNKrY44ndMsQht.jpg",
+   "v": 3,
+   "cast": [
+    "Holly Goss",
+    "Matt Stokoe",
+    "Luke Albright",
+    "Ryan Hawley"
+   ],
+   "tmdbId": 169219,
+   "backdrop": "https://image.tmdb.org/t/p/w1280/j5iUZRZtaPJbYJxvB6ZtmbE5LsZ.jpg",
+   "trailer": "CrkvuW5Mw4s",
+   "castP": [
+    "https://image.tmdb.org/t/p/w185/8ntJju4Obk4HaWDk2yuEFSA3i5.jpg",
+    "https://image.tmdb.org/t/p/w185/3DduVhDjIZIgLx9E9VwICeFmHNh.jpg",
+    "https://image.tmdb.org/t/p/w185/jxrtgA67S56VJ66L4FL6hOHM6Jc.jpg",
+    "https://image.tmdb.org/t/p/w185/glzRXwvy1y0TSftE3wPZUH8wbql.jpg"
+   ],
+   "dirP": [
+    {
+     "n": "Renny Harlin",
+     "p": "https://image.tmdb.org/t/p/w185/IhXiDrZBrsLZpB5K5BmzUGkp4G.jpg"
+    }
+   ],
+   "imdbVotes": 31166,
+   "lbUrl": "https://letterboxd.com/film/the-dyatlov-pass-incident/"
   }
  ],
  "cols": [
