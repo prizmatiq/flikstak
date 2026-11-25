@@ -22837,6 +22837,29 @@
    "imdbId": null,
    "runtime": null,
    "overview": null
+  },
+  {
+   "id": "devil's pass|2013",
+   "t": "Devil's Pass",
+   "y": 2013,
+   "d": "Renny Harlin",
+   "type": "film",
+   "imdbId": "tt1905040",
+   "idLock": true,
+   "g": [
+    "Horror",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "c": [
+    "dr",
+    "wp"
+   ],
+   "n": "Found footage. Also released as The Dyatlov Pass Incident.",
+   "w": false,
+   "r": null,
+   "lb": null,
+   "imdb": null
   }
  ],
  "cols": [
