@@ -1,5 +1,5 @@
 {
- "_help": "Manual corrections. Key = film id (title|year in lowercase, as first added). imdbId fixes a wrong match, poster sets a picture, t renames, d corrects the director, trailer = YouTube video id, cast = list of names, n = note (empty string removes it). The enrich script applies these on every run. w = watched (true/false), wd = month watched (\"2026-08\"), rev = my review, revT = its title; these three are applied once, so later edits in the web app stay. watch = link to the full film (shows a Watch button instead of Trailer).",
+ "_help": "Manual corrections. Key = film id (title|year in lowercase, as first added). imdbId fixes a wrong match, poster sets a picture, t renames, d corrects the director, trailer = YouTube video id, cast = list of names, n = note (empty string removes it). The enrich script applies these on every run. w = watched (true/false), wd = month watched (\"2026-08\"), rev = my review, revT = its title; these three are applied once, so later edits in the web app stay. watch = link to the full film (shows a Watch button instead of Trailer). overview = a curated synopsis, preserved after metadata lookups.",
  "onibaba|1964": {
   "imdbId": "tt0058430",
   "poster": "https://image.tmdb.org/t/p/w500/6IuG74QxgELxmJToIfVNJlsTrMp.jpg"
@@ -317,7 +317,8 @@
  "hearing damage|2026": {
   "trailer": "wttsG4WB6es",
   "poster": "https://prizmatiq.github.io/flikstak/posters/hearing-damage.jpg",
-  "watch": "https://youtu.be/wttsG4WB6es"
+  "watch": "https://youtu.be/wttsG4WB6es",
+  "overview": "Between two shelves of books, a young woman and a young man stand face to face. In the narrow aisle, each can see the other’s slightest change of expression."
  },
  "beau is afraid|2023": {
   "poster": "https://image.tmdb.org/t/p/w500/wgVkkjigF31r1nZV80uV0xNIoun.jpg"
@@ -585,5 +586,29 @@
  },
  "the liberation|2026": {
   "imdbId": "tt8613988"
+ },
+ "divided by tracks, united by tracks|2025": {
+  "overview": "Two strangers notice each other from opposite platforms of the New York subway. They share a moment across the tracks as TV Girl’s “Lovers Rock” plays."
+ },
+ "i'll remember you|2026": {
+  "overview": "A couple embrace on a subway platform. Set to Chelsea Jordan’s song about feelings that linger, the music video turns an ordinary station into a place to remember someone by."
+ },
+ "what have you been up to?|2026": {
+  "overview": "Two people in their twenties try to make small talk. A familiar catch-up question leaves them searching for something to say about where their lives are going."
+ },
+ "biohazard|2026": {
+  "overview": "Ethan Winters goes looking for his missing wife and falls into the hands of the Baker family. A mysterious infection has taken hold of the household in this live-action short based on Resident Evil 7."
+ },
+ "project arc: an arc raiders fan film|2026": {
+  "overview": "Two raiders head to the surface to retrieve a tape. Only one knows the rest of the assignment: Tian Wen wants the other raider to stay topside for good."
+ },
+ "nothing much.|2026": {
+  "overview": "A young man holds a phone to his ear. The camera stays close enough to catch what passes across his face, giving the title’s casual “nothing much” a second meaning."
+ },
+ "this is us|2025": {
+  "overview": "A man listens, his eyes shifting as he takes in what he hears. Joan Pous reimagines dialogue from This Is Us in hand-painted-looking 3D animation inspired by Arcane."
+ },
+ "one last walk|2026": {
+  "overview": "Ray and Tess walk side by side down a residential street. Hanging over their time together is a question neither can put a number to: how much longer do they have?"
  }
 }

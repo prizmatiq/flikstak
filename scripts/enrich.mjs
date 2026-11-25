@@ -301,6 +301,7 @@ if (missed.length) console.log("Check these on the site → open the film → Ed
 // OMDb sometimes returns HTML entities ("O&apos;Brien") — turn them back into plain characters.
 const unent = (x) => typeof x === "string" ? x.replace(/&(apos|#39|quot|amp|lt|gt);/g, (_, e) => ({ apos: "'", "#39": "'", quot: '"', amp: "&", lt: "<", gt: ">" })[e]) : x;
 for (const f of lib.films) {
+  if (fixes[f.id]?.overview) f.overview = fixes[f.id].overview;
   for (const k of ["t", "d", "overview"]) if (typeof f[k] === "string") f[k] = unent(f[k]);
   if (Array.isArray(f.cast)) f.cast = f.cast.map(unent);
 }
